@@ -8,9 +8,6 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("signvideos/2.mp4")]
-[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("signvideos/2.wmv")]
-[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("signvideos/4.mp4")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("signvideos/basagrisi.mp4")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("signvideos/basimdonuyor.mp4")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("signvideos/bogazimsisti.mp4")]

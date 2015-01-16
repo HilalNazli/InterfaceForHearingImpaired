@@ -12,7 +12,6 @@ C:\Users\hilal\Desktop\InterfaceForHI\InterfaceForHI\obj\Debug\InterfaceForHI.cs
 C:\Users\hilal\Desktop\InterfaceForHI\InterfaceForHI\obj\Debug\InterfaceForHI.exe
 C:\Users\hilal\Desktop\InterfaceForHI\InterfaceForHI\obj\Debug\InterfaceForHI.pdb
 C:\Users\hilal\Desktop\InterfaceForHI\InterfaceForHI\obj\Debug\InterfaceForHI.csprojResolveAssemblyReference.cache
-C:\Users\hilal\Desktop\InterfaceForHI\InterfaceForHI\bin\Debug\SignVideos\4.mp4
 C:\Users\hilal\Desktop\InterfaceForHI\InterfaceForHI\bin\Debug\SignVideos\HowCanIHelpYou.mp4
 C:\Users\hilal\Desktop\InterfaceForHI\InterfaceForHI\bin\Debug\SignVideos\BasAgrisi.mp4
 C:\Users\hilal\Desktop\InterfaceForHI\InterfaceForHI\bin\Debug\SignVideos\BasimDonuyor.mp4

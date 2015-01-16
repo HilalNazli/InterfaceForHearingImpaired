@@ -65,7 +65,8 @@
                            HorizontalAlignment="Left"
                            Margin="32 0 0 0"
                            Width="128"
-                           Height="128"/>
+                           Height="128"
+                           Visibility="Hidden"/>
                 </Grid>
             </Grid>
         </Grid>
@@ -92,78 +93,98 @@
                        HorizontalAlignment="Right"
                        VerticalAlignment="Top"
                        Width="64"
-                       Height="240"/>
+                       Height="240"
+                       MouseLeftButtonDown="I_Prev_MouseLeftButtonDown"/>
                 </Grid>
                 <Grid HorizontalAlignment="Center" Width="960" Height="350">
-                    <Border Background="{StaticResource WhiteBrush}"/>
-                    <Grid HorizontalAlignment="Left" Margin="32 0 0 0" Width="295">
-                        <DockPanel HorizontalAlignment="Center">
-                            <MediaElement 
-                                DockPanel.Dock="Top"
-                                Name="meBasAgrisiVideo"
-                                Source="SignVideos/BasAgrisi.mp4" 
-                                Height="200"
-                                LoadedBehavior="Manual"
-                                MediaEnded="meBasAgrisiVideo_MediaEnded" 
-                                Stretch="Uniform"/>
-                            <TextBlock 
-                                Name="TBBasAgrisi"
-                                Margin="0 0 0 0"
-                                Text="Başım Ağrıyor"
-                                FontSize="24"
-                                HorizontalAlignment="Center"
-                                Foreground="{StaticResource BlackPen}"
-                                VerticalAlignment="Center"/>
-                        </DockPanel>
-                    </Grid>
-                    <Grid HorizontalAlignment="Center">
-                        <DockPanel HorizontalAlignment="Center" Width="295">
-                            <MediaElement 
-                                DockPanel.Dock="Top"
-                                Name="meBasimDonuyorVideo"
-                                Source="SignVideos/BasimDonuyor.mp4" 
-                                Height="200"
-                                LoadedBehavior="Manual"
-                                MediaEnded="meBasDonmesiVideo_MediaEnded" 
-                                Stretch="Uniform"/>
-                            <TextBlock 
-                                Name="TBBasimDonuyor"
-                                Margin="0 0 0 0"
-                                Text="Başım Dönüyor"
-                                FontSize="24"
-                                HorizontalAlignment="Center"
-                                Foreground="{StaticResource BlackPen}"
-                                VerticalAlignment="Center"/>
-                        </DockPanel>
-                    </Grid>
-                    <Grid HorizontalAlignment="Right" Margin="0 0 32 0" Width="295">
-                        <DockPanel HorizontalAlignment="Center">
-                            <MediaElement 
-                                DockPanel.Dock="Top"
-                                Name="meBogazimSistiVideo"
-                                Source="SignVideos/BogazimSisti.mp4" 
-                                Height="200"
-                                LoadedBehavior="Manual"
-                                MediaEnded="meBogazimSistiVideo_MediaEnded" 
-                                Stretch="Uniform"/>
-                            <TextBlock 
-                                Name="TBBogazimSisti"
-                                Margin="0 0 0 0"
-                                Text="Boğazım şişti"
-                                FontSize="24"
-                                HorizontalAlignment="Center"
-                                Foreground="{StaticResource BlackPen}"
-                                VerticalAlignment="Center"/>
-                        </DockPanel>
-                    </Grid>
+                    <ScrollViewer Visibility="Hidden" IsVisibleChanged="svAnswers_IsVisibleChanged" Name="svAnswers" VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Hidden" VerticalAlignment="Top">
+                        <StackPanel Name="spAnswers" Orientation="Horizontal" HorizontalAlignment="Center" >
+                        <Border Background="{StaticResource WhiteBrush}"/>
+                        <Grid Name="gAnswer1" Margin="32 0 0 0" Width="295">
+                            <DockPanel HorizontalAlignment="Center">
+                                <MediaElement 
+                                        DockPanel.Dock="Top"
+                                        Name="meBasAgrisiVideo"
+                                        Source="SignVideos/BasAgrisi.mp4" 
+                                        Height="200"
+                                        LoadedBehavior="Manual"
+                                        MediaEnded="meBasAgrisiVideo_MediaEnded" 
+                                        Stretch="Uniform"/>
+                                <TextBlock 
+                                        Name="TBBasAgrisi"
+                                        Text="Başım Ağrıyor"
+                                        FontSize="24"
+                                        HorizontalAlignment="Center"
+                                        Foreground="{StaticResource BlackPen}"
+                                        FontStretch="Condensed"/>
+                            </DockPanel>
+                        </Grid>
+                        <Grid Name="gAnswer2" Margin="32 0 0 0" Width="295">
+                            <DockPanel HorizontalAlignment="Center">
+                                <MediaElement 
+                                    DockPanel.Dock="Top"
+                                    Name="meBasimDonuyorVideo"
+                                    Source="SignVideos/BasimDonuyor.mp4" 
+                                    Height="200"
+                                    LoadedBehavior="Manual"
+                                    MediaEnded="meBasDonmesiVideo_MediaEnded" 
+                                    Stretch="Uniform"/>
+                                <TextBlock 
+                                    Name="TBBasimDonuyor"
+                                    Text="Başım Dönüyor"
+                                    FontSize="24"
+                                    HorizontalAlignment="Center"
+                                    Foreground="{StaticResource BlackPen}"/>
+                            </DockPanel>
+                        </Grid>
+                        <Grid Name="gAnswer3" Margin="32 0 0 0" Width="295">
+                            <DockPanel HorizontalAlignment="Center">
+                                <MediaElement 
+                                    DockPanel.Dock="Top"
+                                    Name="meBogazimSistiVideo"
+                                    Source="SignVideos/BogazimSisti.mp4" 
+                                    Height="200"
+                                    LoadedBehavior="Manual"
+                                    MediaEnded="meBogazimSistiVideo_MediaEnded" 
+                                    Stretch="Uniform"/>
+                                <TextBlock 
+                                    Name="TBBogazimSisti"
+                                    Text="Boğazım şişti"
+                                    FontSize="24"
+                                    HorizontalAlignment="Center"
+                                    Foreground="{StaticResource BlackPen}"/>
+                            </DockPanel>
+                        </Grid>
+                        <Grid Name="gAnswer4" Margin="32 0 0 0" Width="295">
+                            <DockPanel HorizontalAlignment="Center">
+                                <MediaElement 
+                                    DockPanel.Dock="Top"
+                                    Name="meBaskaVideo"
+                                    Source="SignVideos/BasAgrisi.mp4" 
+                                    Height="200"
+                                    LoadedBehavior="Manual"
+                                    MediaEnded="meBaskaVideo_MediaEnded" 
+                                    Stretch="Uniform"/>
+                                <TextBlock 
+                                    Name="TBBaska"
+                                    Text="Baska"
+                                    FontSize="24"
+                                    HorizontalAlignment="Center"
+                                    Foreground="{StaticResource BlackPen}" />
+                            </DockPanel>
+                        </Grid>
+                 </StackPanel>
+                </ScrollViewer>
                 </Grid>
+
                 <Grid HorizontalAlignment="Right">
                     <Image Name="I_Next" 
                        Source="assets/button/_next.png"
                        HorizontalAlignment="Left"
                        VerticalAlignment="Top"
                        Width="64"
-                       Height="240"/>
+                       Height="240"
+                       MouseLeftButtonDown="I_Next_MouseLeftButtonDown"/>
                 </Grid>
                 
 
