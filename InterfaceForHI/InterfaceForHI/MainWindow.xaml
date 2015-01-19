@@ -18,7 +18,22 @@
         <SolidColorBrush x:Key="WhitePen" Color="#ffffff" />
         <SolidColorBrush x:Key="BlackPen" Color="#404040" />
         <SolidColorBrush x:Key="BlackPen_" Color="#a3a3a3" />
+        <Style x:Key="RoundButtonTemplate" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border CornerRadius="10" BorderBrush="{StaticResource OrangBrush_}"
+                                BorderThickness="3">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center">
 
+                            </ContentPresenter>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
 
     </Window.Resources>
     <Grid>
@@ -106,6 +121,41 @@
                         
                         </StackPanel>
                     </ScrollViewer>
+                    <StackPanel Visibility="Hidden" Name="spInput" Orientation="Vertical" VerticalAlignment="Top">
+                        <TextBox
+                            Name="tbName"
+                            Height="48"
+                            Width="480"
+                            Margin="0 32 0 32"
+                            BorderBrush="{StaticResource GrayBrush}"
+                            BorderThickness="3"
+                            TextAlignment="Center"
+                            FontSize="24"/>
+                        <Button 
+                            Name="bOtherName"
+                            Style="{StaticResource RoundButtonTemplate}"
+                            Height="48"
+                            Width="100"
+                            FontSize="24"
+                            Content="Tamam"
+                            Visibility="Hidden"
+                            PreviewMouseDown="bOtherName_MouseLeftButtonDown"
+                         >
+                        </Button>
+                        <Button 
+                            Name="bName"
+                            Style="{StaticResource RoundButtonTemplate}"
+                            Height="48"
+                            Width="100"
+                            FontSize="24"
+                            Background="Transparent"
+                            Content="Tamam"
+                            Visibility="Hidden"
+                            PreviewMouseDown="bName_MouseLeftButtonDown"
+                           >
+                        </Button>
+                    </StackPanel>
+                    
                 </Grid>
 
                 <Grid HorizontalAlignment="Right">
