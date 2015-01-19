@@ -30,6 +30,8 @@
             <RowDefinition Height="382*"/>
             <RowDefinition Height="3*"/>
             <RowDefinition Height="128*"/>
+            <RowDefinition Height="64*"/>
+
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
             <Border Background="{StaticResource BlackBrush}"/>
@@ -53,14 +55,16 @@
             <Border Background="{StaticResource GrayBrush}"/>
             <Grid HorizontalAlignment="Center" Width="960">
                 <Border Background="{StaticResource WhiteBrush}"/>
-                <Grid VerticalAlignment="Bottom" Margin="0 0 0 32">
+                <Grid VerticalAlignment="Bottom">
+                    <Frame x:Name="questionFrame"></Frame>
                     <MediaElement 
                         Name="meMainVideo"
-                        Source="SignVideos/HowCanIHelpYou.mp4" 
+                        Source="SignVideos/HowCanIHelpYou.mp4"
                         Height="480"
                         LoadedBehavior="Manual"
                         MediaEnded="meMainVideo_MediaEnded" 
-                        Stretch="Uniform"/>
+                        Stretch="Uniform"
+                        />
                     <Image Name="IRe" Source="assets/button/re.png"
                            HorizontalAlignment="Left"
                            Margin="32 0 0 0"
@@ -99,82 +103,10 @@
                 <Grid HorizontalAlignment="Center" Width="960" Height="350">
                     <ScrollViewer Visibility="Hidden" IsVisibleChanged="svAnswers_IsVisibleChanged" Name="svAnswers" VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Hidden" VerticalAlignment="Top">
                         <StackPanel Name="spAnswers" Orientation="Horizontal" HorizontalAlignment="Center" >
-                        <Border Background="{StaticResource WhiteBrush}"/>
-                        <Grid Name="gAnswer1" Margin="32 0 0 0" Width="295">
-                            <DockPanel HorizontalAlignment="Center">
-                                <MediaElement 
-                                        DockPanel.Dock="Top"
-                                        Name="meBasAgrisiVideo"
-                                        Source="SignVideos/BasAgrisi.mp4" 
-                                        Height="200"
-                                        LoadedBehavior="Manual"
-                                        MediaEnded="meBasAgrisiVideo_MediaEnded" 
-                                        Stretch="Uniform"/>
-                                <TextBlock 
-                                        Name="TBBasAgrisi"
-                                        Text="Başım Ağrıyor"
-                                        FontSize="24"
-                                        HorizontalAlignment="Center"
-                                        Foreground="{StaticResource BlackPen}"
-                                        FontStretch="Condensed"/>
-                            </DockPanel>
-                        </Grid>
-                        <Grid Name="gAnswer2" Margin="32 0 0 0" Width="295">
-                            <DockPanel HorizontalAlignment="Center">
-                                <MediaElement 
-                                    DockPanel.Dock="Top"
-                                    Name="meBasimDonuyorVideo"
-                                    Source="SignVideos/BasimDonuyor.mp4" 
-                                    Height="200"
-                                    LoadedBehavior="Manual"
-                                    MediaEnded="meBasDonmesiVideo_MediaEnded" 
-                                    Stretch="Uniform"/>
-                                <TextBlock 
-                                    Name="TBBasimDonuyor"
-                                    Text="Başım Dönüyor"
-                                    FontSize="24"
-                                    HorizontalAlignment="Center"
-                                    Foreground="{StaticResource BlackPen}"/>
-                            </DockPanel>
-                        </Grid>
-                        <Grid Name="gAnswer3" Margin="32 0 0 0" Width="295">
-                            <DockPanel HorizontalAlignment="Center">
-                                <MediaElement 
-                                    DockPanel.Dock="Top"
-                                    Name="meBogazimSistiVideo"
-                                    Source="SignVideos/BogazimSisti.mp4" 
-                                    Height="200"
-                                    LoadedBehavior="Manual"
-                                    MediaEnded="meBogazimSistiVideo_MediaEnded" 
-                                    Stretch="Uniform"/>
-                                <TextBlock 
-                                    Name="TBBogazimSisti"
-                                    Text="Boğazım şişti"
-                                    FontSize="24"
-                                    HorizontalAlignment="Center"
-                                    Foreground="{StaticResource BlackPen}"/>
-                            </DockPanel>
-                        </Grid>
-                        <Grid Name="gAnswer4" Margin="32 0 0 0" Width="295">
-                            <DockPanel HorizontalAlignment="Center">
-                                <MediaElement 
-                                    DockPanel.Dock="Top"
-                                    Name="meBaskaVideo"
-                                    Source="SignVideos/BasAgrisi.mp4" 
-                                    Height="200"
-                                    LoadedBehavior="Manual"
-                                    MediaEnded="meBaskaVideo_MediaEnded" 
-                                    Stretch="Uniform"/>
-                                <TextBlock 
-                                    Name="TBBaska"
-                                    Text="Baska"
-                                    FontSize="24"
-                                    HorizontalAlignment="Center"
-                                    Foreground="{StaticResource BlackPen}" />
-                            </DockPanel>
-                        </Grid>
-                 </StackPanel>
-                </ScrollViewer>
+                            <Border Background="{StaticResource WhiteBrush}"/>
+                        
+                        </StackPanel>
+                    </ScrollViewer>
                 </Grid>
 
                 <Grid HorizontalAlignment="Right">
@@ -221,6 +153,9 @@
                 
             </Grid>
         </Grid>
+        <Grid Grid.Row="6">
+            <Border Background="{StaticResource WhiteBrush}"/>
 
+        </Grid>
     </Grid>
 </Window>
