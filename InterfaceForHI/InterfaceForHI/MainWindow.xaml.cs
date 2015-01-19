@@ -20,6 +20,7 @@ namespace InterfaceForHI
     /// </summary>
     public partial class MainWindow : Window
     {
+        String RESULT = "";
         double ratio = 0;
         Boolean isRepeated = false;
         Boolean isSvAnswersVisible = false;
@@ -33,6 +34,8 @@ namespace InterfaceForHI
             
             mainWindow.Width = System.Windows.SystemParameters.PrimaryScreenWidth;
             mainWindow.Height = System.Windows.SystemParameters.PrimaryScreenHeight;
+
+
             loadQuestion1();
             initializeSizes(ratio);
         }
@@ -49,7 +52,7 @@ namespace InterfaceForHI
             double heightOfIRe = 128;
             double widthOfIRe = 128;
 
-            double fontSizeOfTBHow = 48;
+            double fontSizeOfTBQuestion = 48;
 
             double heightOfI_Prev = 240;
             double widthOfI_Prev = 64;
@@ -81,7 +84,7 @@ namespace InterfaceForHI
             mainWindow.IRe.Height = heightOfIRe * ratio;
             mainWindow.IRe.Width = widthOfIRe * ratio;
 
-            mainWindow.TBHow.FontSize = fontSizeOfTBHow * ratio;
+            mainWindow.TBQuestion.FontSize = fontSizeOfTBQuestion * ratio;
 
             mainWindow.I_Prev.Height = heightOfI_Prev * ratio;
             mainWindow.I_Prev.Width = widthOfI_Prev * ratio;
@@ -117,6 +120,7 @@ namespace InterfaceForHI
             me.Height = 200 * ratio;
             me.LoadedBehavior = System.Windows.Controls.MediaState.Manual;
             me.MediaEnded += new RoutedEventHandler(AnswerMediaEnded);
+            me.MouseLeftButtonDown += new MouseButtonEventHandler(AnswersToQuestion1MediaMouseLeftButtonDown);
             me.Stretch = Stretch.Uniform;
 
         }
@@ -148,6 +152,27 @@ namespace InterfaceForHI
             MediaElement me = (MediaElement)args.Source;
             me.Position = System.TimeSpan.Zero;
             me.Play();
+        }
+        private void AnswersToQuestion1MediaMouseLeftButtonDown(object sender, MouseButtonEventArgs args)
+        {
+            MediaElement me = (MediaElement)args.Source;
+            DockPanel dp = new DockPanel();
+            dp = (DockPanel)me.Parent;
+            TextBlock tb = new TextBlock();
+            tb = dp.Children.OfType<TextBlock>().FirstOrDefault();
+            if (tb.Text.Equals("Hastayım"))
+            {
+                RESULT = RESULT + "Bu kişi hastadır.\n";
+                //loadQuestion3
+            }
+            else if (tb.Text.Equals("Bilgi Almak İstiyorum"))
+            {
+                RESULT = RESULT + "Bu kişi bilgi almak istiyor.\n";
+                //loadQuestion2
+            }
+            System.Diagnostics.Debug.WriteLine(RESULT);
+
+
         }
 
         private void meMainVideo_MediaEnded(object sender, RoutedEventArgs e)
@@ -240,6 +265,7 @@ namespace InterfaceForHI
         //spAnswers.Children.Add(g);
         private void loadQuestion1() { 
             //Set the question in the main video
+            TBQuestion.Text = "Nasıl Yardımcı Olabilirim?";
             meMainVideo.Source = new System.Uri("SignVideos/Questions/Question1/NasilYardimciOlabilirim.mp4",UriKind.Relative);
             isRepeated = false;
             restartVideo();

@@ -79,9 +79,8 @@
             <Grid HorizontalAlignment="Center" Width="960">
                 <Border Background="{StaticResource OrangBrush_}"/>
                 <TextBlock 
-                    Name="TBHow"
+                    Name="TBQuestion"
                     Margin="32 0 0 0"
-                    Text="Nasıl Yardımcı Olabilirim?"
                     FontSize="48"
                     Foreground="{StaticResource WhitePen}"
                     VerticalAlignment="Center"/>
