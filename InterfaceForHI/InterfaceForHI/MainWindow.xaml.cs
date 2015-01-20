@@ -26,6 +26,7 @@ namespace InterfaceForHI
         Boolean isRepeated = false;
         Boolean isInQuestion4 = false;
         int count = 0;
+        int letItLoadCount = 0;
         int videoTrickCount = 0;
         double svAnswersHorizontalOffset = 0;
         public MainWindow()
@@ -292,6 +293,7 @@ namespace InterfaceForHI
         {
             //System.Diagnostics.Debug.WriteLine("Menude birseye basildi.");
             bClose.Visibility = System.Windows.Visibility.Hidden;
+            lvMenu.Visibility = System.Windows.Visibility.Hidden;
             ListViewItem lvi = new ListViewItem();
             lvi = (ListViewItem)args.Source;
             if (lvi.Content.Equals("Giriş")) {
@@ -403,67 +405,111 @@ namespace InterfaceForHI
         private void I_Next_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             svAnswers.LineRight();
+            incrementVideoTrickCount();
         }
 
         private void I_Prev_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+
             svAnswers.LineLeft();
-           
+            decrementVideoTrickCount();
 
         }
+        private void incrementVideoTrickCount() {
+            videoTrickCount++;
+            System.Diagnostics.Debug.WriteLine(videoTrickCount);
+            if (videoTrickCount % 15 == 0 && videoTrickCount != 0)
+            {
+                int videoOff = videoTrickCount / 15 - 1;
+                //0.yi kapat 5.yi ac
+                
+                videoTrick(spAnswers, videoOff, true);
+                
+            }
+        }
 
+        private void decrementVideoTrickCount() {
+            videoTrickCount--;
+            System.Diagnostics.Debug.WriteLine(videoTrickCount);
+            if (videoTrickCount % 15 == 0 && videoTrickCount != 0)
+            {
+                int videoOff = videoTrickCount / 15 - 1;
+                //0.i kapat -5.i ac
+  
+                videoTrick(spAnswers, videoOff, false);
+            }
+        }
         private void dispatcherTimer_Tick(object sender, EventArgs e)
         {
-            if (isInQuestion4)
-            {
-                videoTrickCount++;
-                System.Diagnostics.Debug.WriteLine(videoTrickCount);
-                if (videoTrickCount % 15 == 0 && videoTrickCount != 0 ) {
-                    int videoOff = videoTrickCount/15 -1;
-                    //0.yi kapat 5.yi ac
-                    if (videoOff <= 8) {
-                        videoTrick(spAnswers, videoOff);
+            if (letItLoadCount < 3) {
+                letItLoadCount++;
+            }else{ 
+                if (isInQuestion4)
+                {
+                    incrementVideoTrickCount();
+                }
+                //System.Diagnostics.Debug.WriteLine(svAnswers.HorizontalOffset);
+                svAnswers.LineRight();
+
+                //If viewer is at its right end, get it to left end
+                if (svAnswersHorizontalOffset == svAnswers.HorizontalOffset && svAnswersHorizontalOffset != 0) {
+                    count++;
+                }
+                if (count == 2) {
+                    count = 0;
+                    svAnswers.ScrollToLeftEnd();
+                    videoTrickCount = 0;
+                    if (isInQuestion4) {
+                        playSomeChildren(spAnswers);
                     }
                 }
+                svAnswersHorizontalOffset = svAnswers.HorizontalOffset;
             }
-            //System.Diagnostics.Debug.WriteLine(svAnswers.HorizontalOffset);
-            svAnswers.LineRight();
-
-            //If viewer is at its right end, get it to left end
-            if (svAnswersHorizontalOffset == svAnswers.HorizontalOffset && svAnswersHorizontalOffset != 0) {
-                count++;
-            }
-            if (count == 2) {
-                count = 0;
-                svAnswers.ScrollToLeftEnd();
-                videoTrickCount = 0;
-                if (isInQuestion4) {
-                    playSomeChildren(spAnswers);
-                }
-            }
-            svAnswersHorizontalOffset = svAnswers.HorizontalOffset;
         }
-        private void videoTrick(StackPanel stackPanel, int videoOff)
+        private void videoTrick(StackPanel stackPanel, int videoOff, Boolean isIncrement)
         {
             foreach (Grid g in stackPanel.Children)
             {
+               
                 if (stackPanel.Children.IndexOf(g) == videoOff) {
-                    System.Diagnostics.Debug.WriteLine("Video to stop is found");
-                    DockPanel d = g.Children.OfType<DockPanel>().FirstOrDefault();
-                    TextBlock tb = d.Children.OfType<TextBlock>().FirstOrDefault();
-                    System.Diagnostics.Debug.WriteLine(tb.Text);
-                    MediaElement me = d.Children.OfType<MediaElement>().FirstOrDefault();
-                    me.Stop();
+                    if (isIncrement)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Video to stop is found");
+                        DockPanel d = g.Children.OfType<DockPanel>().FirstOrDefault();
+                        TextBlock tb = d.Children.OfType<TextBlock>().FirstOrDefault();
+                        System.Diagnostics.Debug.WriteLine(tb.Text);
+                        MediaElement me = d.Children.OfType<MediaElement>().FirstOrDefault();
+                        me.Stop();
+                    }
+                    else {
+                        System.Diagnostics.Debug.WriteLine("Video to start is found");
+                        DockPanel d = g.Children.OfType<DockPanel>().FirstOrDefault();
+                        TextBlock tb = d.Children.OfType<TextBlock>().FirstOrDefault();
+                        System.Diagnostics.Debug.WriteLine(tb.Text);
+                        MediaElement me = d.Children.OfType<MediaElement>().FirstOrDefault();
+                        me.Play();
+                    }
                 }
                 else if (stackPanel.Children.IndexOf(g) == (videoOff + 5))
                 {
-                    System.Diagnostics.Debug.WriteLine("Video to start is found");
-                    DockPanel d = g.Children.OfType<DockPanel>().FirstOrDefault();
-                    TextBlock tb = d.Children.OfType<TextBlock>().FirstOrDefault();
-                    System.Diagnostics.Debug.WriteLine(tb.Text);
-                    MediaElement me = d.Children.OfType<MediaElement>().FirstOrDefault();
-                    me.Play();
-                    break;
+                    if (isIncrement)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Video to start is found");
+                        DockPanel d = g.Children.OfType<DockPanel>().FirstOrDefault();
+                        TextBlock tb = d.Children.OfType<TextBlock>().FirstOrDefault();
+                        System.Diagnostics.Debug.WriteLine(tb.Text);
+                        MediaElement me = d.Children.OfType<MediaElement>().FirstOrDefault();
+                        me.Play();
+                    
+                    }
+                    else {
+                        System.Diagnostics.Debug.WriteLine("Video to stop is found");
+                        DockPanel d = g.Children.OfType<DockPanel>().FirstOrDefault();
+                        TextBlock tb = d.Children.OfType<TextBlock>().FirstOrDefault();
+                        System.Diagnostics.Debug.WriteLine(tb.Text);
+                        MediaElement me = d.Children.OfType<MediaElement>().FirstOrDefault();
+                        me.Stop();
+                    }
                 }
                
             }
@@ -491,6 +537,7 @@ namespace InterfaceForHI
                 spAnswers.Children.Clear();
                 dispatcherTimer.Stop();
                 videoTrickCount = 0;
+                letItLoadCount = 0;
             }
         }
 
