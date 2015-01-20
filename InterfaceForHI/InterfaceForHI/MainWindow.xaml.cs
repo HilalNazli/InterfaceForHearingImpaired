@@ -23,12 +23,10 @@ namespace InterfaceForHI
     {
         Person person = new Person();
         double ratio = 0;
-        Boolean isNotEmergency = false;
         Boolean isRepeated = false;
-        Boolean isSvAnswersVisible = false;
-        System.Windows.Threading.DispatcherTimer dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
-        System.Windows.Threading.DispatcherTimer dispatcherTimer2 = new System.Windows.Threading.DispatcherTimer();
-
+        Boolean isInQuestion4 = false;
+        int count = 0;
+        int videoTrickCount = 0;
         double svAnswersHorizontalOffset = 0;
         public MainWindow()
         {
@@ -86,6 +84,7 @@ namespace InterfaceForHI
             double widthOfBName = 100;
             double fontOfBName = 24;
 
+            double widthOfLVMenu = 280;
             //Resize everything with THE ratio yeah!
             mainWindow.IDropdown_ico.Height = heightOfIDropdown_ico * ratio;
             mainWindow.IDropdown_ico.Width = widthOfIDropdown_ico * ratio;
@@ -133,6 +132,8 @@ namespace InterfaceForHI
             bOtherName.Height = heightOfBName * ratio;
             bOtherName.Width = widthOfBName * ratio;
             bOtherName.FontSize = fontOfBName * ratio;
+
+            lvMenu.Width = widthOfLVMenu * ratio;
 
         }
 
@@ -186,11 +187,15 @@ namespace InterfaceForHI
             dp = (DockPanel)me.Parent;
             TextBlock tb = new TextBlock();
             tb = dp.Children.OfType<TextBlock>().FirstOrDefault();
+
+            ListViewItem lvi = new ListViewItem();
+            lvi.PreviewMouseDown += new MouseButtonEventHandler(listViewItemMouseDown);
             if (tb.Text.Equals("Hastayım"))
             {
                 person.programFlow = person.programFlow + "Bu kişi hastadır.\n";
                 person.isSick = true;
                 person.isSeekingInfo = false;
+ 
                 loadQuestion3();
             }
             else if (tb.Text.Equals("Bilgi Almak İstiyorum"))
@@ -198,12 +203,14 @@ namespace InterfaceForHI
                 person.programFlow = person.programFlow + "Bu kişi bilgi almak istiyor.\n";
                 person.isSeekingInfo = true;
                 person.isSick = false;
+       
                 loadQuestion2();
             }
             else if (tb.Text.Equals("Hasta Ziyareti İçin Geldim"))
             {
                 person.programFlow = person.programFlow + "Hasta ziyareti için geldi.\n";
                 person.soughtInfo = tb.Text;
+
                 //Direction hastanin adini giriniz.
                 loadDirection1();
             }
@@ -211,7 +218,7 @@ namespace InterfaceForHI
             {
                 person.programFlow = person.programFlow + "Sigorta bilgisi almak istiyor.\n";
                 person.soughtInfo = tb.Text;
-
+ 
                 //Kimliginizle danismaya
                 loadDirection2();
             }
@@ -227,7 +234,7 @@ namespace InterfaceForHI
             {
                 person.programFlow = person.programFlow + "Yer sormak istiyor.\n";
                 person.soughtInfo = tb.Text;
-
+  
                 //Kimliginizle danismaya
                 loadDirection2();
             }
@@ -235,18 +242,21 @@ namespace InterfaceForHI
             {
                 person.programFlow = person.programFlow + "Durumu acil.\n";
                 person.isEmergency = true;
+
                 loadQuestion4Emergency();
             }
             else if (tb.Text.Equals("Hayır, Acil Değil"))
             {
                 person.programFlow = person.programFlow + "Durumu acil değil.\n";
                 person.isEmergency = false;
+
                 loadQuestion4NotEmergency();
             }
             else if (tb.Text.Equals("Hayır, Yok"))
             {
                 person.programFlow = person.programFlow + "Randevusu yok.\n";
                 person.hasAppointment = false;
+
                 //Isminizi yaziniz.
                 loadDirection3();
             }
@@ -254,6 +264,7 @@ namespace InterfaceForHI
             {
                 person.programFlow = person.programFlow + "Randevusu var.\n";
                 person.hasAppointment = true;
+
                 //isminizi yaziniz
                 loadDirection3();
             }
@@ -261,7 +272,8 @@ namespace InterfaceForHI
             {
                 person.programFlow = person.programFlow + "Şikayeti:  " + tb.Text + "\n";
                 person.grievance = tb.Text;
-                if (isNotEmergency) {
+ 
+                if (!person.isEmergency) {
                     loadQuestion5();
                 }
                 else
@@ -276,27 +288,109 @@ namespace InterfaceForHI
 
         }
 
+        private void listViewItemMouseDown(object sender, MouseButtonEventArgs args)
+        {
+            //System.Diagnostics.Debug.WriteLine("Menude birseye basildi.");
+            bClose.Visibility = System.Windows.Visibility.Hidden;
+            ListViewItem lvi = new ListViewItem();
+            lvi = (ListViewItem)args.Source;
+            if (lvi.Content.Equals("Giriş")) {
+                loadQuestion1();
+                //System.Diagnostics.Debug.WriteLine("Menude girise basildi.");
+            }
+            else if (lvi.Content.Equals("Hasta")) {
+                loadQuestion3();
+            }
+            else if (lvi.Content.Equals("Bilgi")) {
+                loadQuestion2();
+            }
+            else if (lvi.Content.Equals("Ziyaret")) {
+                loadDirection1();
+            }
+            else if (lvi.Content.Equals("Acil")) {
+                loadQuestion3();
+            }
+            else if (lvi.Content.Equals("Acil Değil")) {
+                loadQuestion3();
+            }
+            else if (lvi.Content.Equals("Randevu Yok"))
+            {
+                loadQuestion5();
+            }
+            else if (lvi.Content.Equals("Randevu Var")) {
+                loadQuestion5();
+            }
+            else if (lvi.Content.Equals("Hasta İsmi")) {
+                loadDirection1();
+            }
+            else if (lvi.Content.Equals("İsim"))
+            {
+                loadDirection3();
+            }
+            else if(!lvi.Content.Equals("")){
+                if (!person.isEmergency)
+                {
+                    loadQuestion4NotEmergency();
+                }
+                else
+                {
+                    loadQuestion4Emergency();
+                }
+            }
+
+        }
+
         private void meMainVideo_MediaEnded(object sender, RoutedEventArgs e)
         {
+         
+
             if (!isRepeated)
             {
                 mainWindow.svAnswers.Visibility = System.Windows.Visibility.Visible;
-                isSvAnswersVisible = true;
-                playAllChildren(spAnswers);
+                if (!isInQuestion4)
+                {
+                    playAllChildren(spAnswers);
+                }
+                else {
+                    playSomeChildren(spAnswers);
+                }
             }
-           
+            
             restartVideo();
+            
+            isRepeated = true;
+
         }
-        public static void playAllChildren(StackPanel stackPanel)
+        public void playAllChildren(StackPanel stackPanel)
         {
-
             //System.Collections.Generic.List<MediaElement> meAnswers = new System.Collections.Generic.List<MediaElement>();
-
             foreach(Grid g in stackPanel.Children){
                 //System.Diagnostics.Debug.WriteLine("Grid found");
                 DockPanel d = g.Children.OfType<DockPanel>().FirstOrDefault();
                 MediaElement me = d.Children.OfType<MediaElement>().FirstOrDefault();
                 me.Play();
+            }
+        }
+        public void playSomeChildren(StackPanel stackPanel) {
+
+            //System.Collections.Generic.List<MediaElement> meAnswers = new System.Collections.Generic.List<MediaElement>();
+            int runningChildCount = 0;
+            foreach (Grid g in stackPanel.Children)
+            {
+                if (!(isInQuestion4 && runningChildCount == 5))
+                {
+                    //System.Diagnostics.Debug.WriteLine("Grid found");
+                    DockPanel d = g.Children.OfType<DockPanel>().FirstOrDefault();
+                    MediaElement me = d.Children.OfType<MediaElement>().FirstOrDefault();
+                    me.Play();
+                    runningChildCount++;
+                }
+                else {
+                    DockPanel d = g.Children.OfType<DockPanel>().FirstOrDefault();
+                    MediaElement me = d.Children.OfType<MediaElement>().FirstOrDefault();
+                    me.Stop();
+                }
+
             }
         }
 
@@ -320,24 +414,83 @@ namespace InterfaceForHI
 
         private void dispatcherTimer_Tick(object sender, EventArgs e)
         {
-           
+            if (isInQuestion4)
+            {
+                videoTrickCount++;
+                System.Diagnostics.Debug.WriteLine(videoTrickCount);
+                if (videoTrickCount % 15 == 0 && videoTrickCount != 0 ) {
+                    int videoOff = videoTrickCount/15 -1;
+                    //0.yi kapat 5.yi ac
+                    if (videoOff <= 8) {
+                        videoTrick(spAnswers, videoOff);
+                    }
+                }
+            }
             //System.Diagnostics.Debug.WriteLine(svAnswers.HorizontalOffset);
             svAnswers.LineRight();
 
             //If viewer is at its right end, get it to left end
             if (svAnswersHorizontalOffset == svAnswers.HorizontalOffset && svAnswersHorizontalOffset != 0) {
+                count++;
+            }
+            if (count == 2) {
+                count = 0;
                 svAnswers.ScrollToLeftEnd();
+                videoTrickCount = 0;
+                if (isInQuestion4) {
+                    playSomeChildren(spAnswers);
+                }
             }
             svAnswersHorizontalOffset = svAnswers.HorizontalOffset;
         }
+        private void videoTrick(StackPanel stackPanel, int videoOff)
+        {
+            foreach (Grid g in stackPanel.Children)
+            {
+                if (stackPanel.Children.IndexOf(g) == videoOff) {
+                    System.Diagnostics.Debug.WriteLine("Video to stop is found");
+                    DockPanel d = g.Children.OfType<DockPanel>().FirstOrDefault();
+                    TextBlock tb = d.Children.OfType<TextBlock>().FirstOrDefault();
+                    System.Diagnostics.Debug.WriteLine(tb.Text);
+                    MediaElement me = d.Children.OfType<MediaElement>().FirstOrDefault();
+                    me.Stop();
+                }
+                else if (stackPanel.Children.IndexOf(g) == (videoOff + 5))
+                {
+                    System.Diagnostics.Debug.WriteLine("Video to start is found");
+                    DockPanel d = g.Children.OfType<DockPanel>().FirstOrDefault();
+                    TextBlock tb = d.Children.OfType<TextBlock>().FirstOrDefault();
+                    System.Diagnostics.Debug.WriteLine(tb.Text);
+                    MediaElement me = d.Children.OfType<MediaElement>().FirstOrDefault();
+                    me.Play();
+                    break;
+                }
+               
+            }
 
+        }
         private void svAnswers_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             //System.Diagnostics.Debug.WriteLine("Visible changed!!!");
-            if (isSvAnswersVisible) { 
+            System.Windows.Threading.DispatcherTimer dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
+
+            if (svAnswers.Visibility.Equals(System.Windows.Visibility.Visible))
+            {
                 dispatcherTimer.Tick += new EventHandler(dispatcherTimer_Tick);
-                dispatcherTimer.Interval = new TimeSpan(0, 0, 2);
+                if (isInQuestion4)
+                {
+                    dispatcherTimer.Interval = new TimeSpan(0, 0, 5);
+                }
+                else {
+                    dispatcherTimer.Interval = new TimeSpan(0, 0, 3);
+
+                }
                 dispatcherTimer.Start();
+            }
+            else {
+                spAnswers.Children.Clear();
+                dispatcherTimer.Stop();
+                videoTrickCount = 0;
             }
         }
 
@@ -347,7 +500,6 @@ namespace InterfaceForHI
             meMainVideo.Source = new System.Uri(questionPath, UriKind.Relative);
             isRepeated = false;
             svAnswers.Visibility = System.Windows.Visibility.Hidden;
-            isSvAnswersVisible = false;
             restartVideo();
             //Clear the stack panel for the answers
             spAnswers.Children.Clear();
@@ -377,6 +529,13 @@ namespace InterfaceForHI
         }
 
         private void loadQuestion1() {
+            svAnswers.Visibility = System.Windows.Visibility.Hidden;
+            ListViewItem lvi = new ListViewItem();
+            lvi.PreviewMouseDown += new MouseButtonEventHandler(listViewItemMouseDown);
+            person = new Person();
+            lvi.Content = "Giriş";
+            lvMenu.Items.Clear();
+            lvMenu.Items.Add(lvi);
             I_Next.Visibility = System.Windows.Visibility.Visible;
             I_Prev.Visibility = System.Windows.Visibility.Visible;
             String question = "Nasıl Yardımcı Olabilirim?";
@@ -392,6 +551,19 @@ namespace InterfaceForHI
         }
 
         private void loadQuestion2() {
+            svAnswers.Visibility = System.Windows.Visibility.Hidden;
+
+            //clear list view menu
+            lvMenu.Items.Clear();
+            ListViewItem lvi1 = new ListViewItem();
+            lvi1.PreviewMouseDown += new MouseButtonEventHandler(listViewItemMouseDown);
+            lvi1.Content = "Giriş";
+            lvMenu.Items.Add(lvi1);
+            ListViewItem lvi2 = new ListViewItem();
+            lvi2.PreviewMouseDown += new MouseButtonEventHandler(listViewItemMouseDown);
+            lvi2.Content = "Bilgi";
+            lvMenu.Items.Add(lvi2);
+
             I_Next.Visibility = System.Windows.Visibility.Visible;
             I_Prev.Visibility = System.Windows.Visibility.Visible;
             String question = "Ne Bilgisi İstiyorsunuz?";
@@ -411,6 +583,18 @@ namespace InterfaceForHI
         }
 
         private void loadQuestion3() {
+            svAnswers.Visibility = System.Windows.Visibility.Hidden;
+
+            //clear list view menu
+            lvMenu.Items.Clear();
+            ListViewItem lvi1 = new ListViewItem();
+            lvi1.PreviewMouseDown += new MouseButtonEventHandler(listViewItemMouseDown);
+            lvi1.Content = "Giriş";
+            lvMenu.Items.Add(lvi1);
+            ListViewItem lvi2 = new ListViewItem();
+            lvi2.PreviewMouseDown += new MouseButtonEventHandler(listViewItemMouseDown);
+            lvi2.Content = "Hasta";
+            lvMenu.Items.Add(lvi2);
             I_Next.Visibility = System.Windows.Visibility.Visible;
             I_Prev.Visibility = System.Windows.Visibility.Visible;
             String question = "Acil Mi?";
@@ -427,6 +611,24 @@ namespace InterfaceForHI
 
         private void loadQuestion4Emergency()
         {
+            svAnswers.Visibility = System.Windows.Visibility.Hidden;
+
+            isInQuestion4 = true;
+
+            //clear list view menu
+            lvMenu.Items.Clear();
+            ListViewItem lvi1 = new ListViewItem();
+            lvi1.PreviewMouseDown += new MouseButtonEventHandler(listViewItemMouseDown);
+            lvi1.Content = "Giriş";
+            lvMenu.Items.Add(lvi1);
+            ListViewItem lvi2 = new ListViewItem();
+            lvi2.PreviewMouseDown += new MouseButtonEventHandler(listViewItemMouseDown);
+            lvi2.Content = "Hasta";
+            lvMenu.Items.Add(lvi2);
+            ListViewItem lvi3 = new ListViewItem();
+            lvi3.PreviewMouseDown += new MouseButtonEventHandler(listViewItemMouseDown);
+            lvi3.Content = "Acil";
+            lvMenu.Items.Add(lvi3);
             I_Next.Visibility = System.Windows.Visibility.Visible;
             I_Prev.Visibility = System.Windows.Visibility.Visible;
             String question = "Şikayetiniz Nedir?";
@@ -455,9 +657,26 @@ namespace InterfaceForHI
             loadQuestion(question, questionPath, answersCount, answers, answersPath);
         }
         private void loadQuestion4NotEmergency() {
+            svAnswers.Visibility = System.Windows.Visibility.Hidden;
+
+            isInQuestion4 = true;
+            //clear list view menu
+            lvMenu.Items.Clear();
+            ListViewItem lvi1 = new ListViewItem();
+            lvi1.PreviewMouseDown += new MouseButtonEventHandler(listViewItemMouseDown);
+            lvi1.Content = "Giriş";
+            lvMenu.Items.Add(lvi1);
+            ListViewItem lvi2 = new ListViewItem();
+            lvi2.PreviewMouseDown += new MouseButtonEventHandler(listViewItemMouseDown);
+            lvi2.Content = "Hasta";
+            lvMenu.Items.Add(lvi2);
+            ListViewItem lvi3 = new ListViewItem();
+            lvi3.PreviewMouseDown += new MouseButtonEventHandler(listViewItemMouseDown);
+            lvi3.Content = "Acil Değil";
+            lvMenu.Items.Add(lvi3);
             I_Next.Visibility = System.Windows.Visibility.Visible;
             I_Prev.Visibility = System.Windows.Visibility.Visible;
-            isNotEmergency = true;
+
             String question = "Şikayetiniz Nedir?";
             String questionPath = "SignVideos/Questions/Question4/SizinSikayetinizNedir.mp4";
             int answersCount = 14;
@@ -495,6 +714,28 @@ namespace InterfaceForHI
         }
 
         private void loadQuestion5() {
+            svAnswers.Visibility = System.Windows.Visibility.Hidden;
+
+            isInQuestion4 = false;
+            //clear list view menu
+            lvMenu.Items.Clear();
+            ListViewItem lvi1 = new ListViewItem();
+            lvi1.PreviewMouseDown += new MouseButtonEventHandler(listViewItemMouseDown);
+            lvi1.Content = "Giriş";
+            lvMenu.Items.Add(lvi1);
+            ListViewItem lvi2 = new ListViewItem();
+            lvi2.PreviewMouseDown += new MouseButtonEventHandler(listViewItemMouseDown);
+            lvi2.Content = "Hasta";
+            lvMenu.Items.Add(lvi2);
+            ListViewItem lvi3 = new ListViewItem();
+            lvi3.PreviewMouseDown += new MouseButtonEventHandler(listViewItemMouseDown);
+            lvi3.Content = "Acil Değil";
+            lvMenu.Items.Add(lvi3);
+            ListViewItem lvi4 = new ListViewItem();
+            lvi4.PreviewMouseDown += new MouseButtonEventHandler(listViewItemMouseDown);
+            lvi4.Content = person.grievance;
+            lvMenu.Items.Add(lvi4);
+
             I_Next.Visibility = System.Windows.Visibility.Visible;
             I_Prev.Visibility = System.Windows.Visibility.Visible;
             String question = "Randevunuz Var Mı?";
@@ -510,6 +751,17 @@ namespace InterfaceForHI
         }
 
         private void loadDirection1(){
+            //clear list view menu
+            lvMenu.Items.Clear();
+            ListViewItem lvi1 = new ListViewItem();
+            lvi1.PreviewMouseDown += new MouseButtonEventHandler(listViewItemMouseDown);
+            lvi1.Content = "Giriş";
+            lvMenu.Items.Add(lvi1);
+            ListViewItem lvi2 = new ListViewItem();
+            lvi2.PreviewMouseDown += new MouseButtonEventHandler(listViewItemMouseDown);
+            lvi2.Content = "Bilgi";
+            lvMenu.Items.Add(lvi2);
+        
             TBQuestion.Text = "Hastanın İsmini Yazınız";
             meMainVideo.Source = new System.Uri("SignVideos/Directions/HastaninIsminiYaziniz.mp4", UriKind.Relative);
             isRepeated = true;
@@ -518,7 +770,6 @@ namespace InterfaceForHI
             I_Prev.Visibility = System.Windows.Visibility.Hidden;
             spInput.Visibility = System.Windows.Visibility.Visible;
             bOtherName.Visibility = System.Windows.Visibility.Visible;
-            isSvAnswersVisible = false;
             restartVideo();
         }
         private void loadDirection2()
@@ -529,25 +780,60 @@ namespace InterfaceForHI
             svAnswers.Visibility = System.Windows.Visibility.Hidden;
             I_Next.Visibility = System.Windows.Visibility.Hidden;
             I_Prev.Visibility = System.Windows.Visibility.Hidden;
-            isSvAnswersVisible = false;
             restartVideo();
 
             //Closing
-            //Printuot function of person
-            person.printOut();
-            //timer
-            dispatcherTimer2.Tick += new EventHandler(dispatcherTimer2_Tick);
-            dispatcherTimer2.Interval = new TimeSpan(0, 0, 16);
-            dispatcherTimer2.Start();
+            
+            bClose.Visibility = System.Windows.Visibility.Visible;
 
         }
 
-        private void dispatcherTimer2_Tick(object sender, EventArgs e)
-        {
-            Application.Current.Shutdown();
-        }
         private void loadDirection3()
         {
+            isInQuestion4 = false;
+            //clear list view menu
+            lvMenu.Items.Clear();
+            ListViewItem lvi1 = new ListViewItem();
+            lvi1.PreviewMouseDown += new MouseButtonEventHandler(listViewItemMouseDown);
+            lvi1.Content = "Giriş";
+            lvMenu.Items.Add(lvi1);
+            ListViewItem lvi2 = new ListViewItem();
+            lvi2.PreviewMouseDown += new MouseButtonEventHandler(listViewItemMouseDown);
+            lvi2.Content = "Hasta";
+            lvMenu.Items.Add(lvi2);
+            ListViewItem lvi3 = new ListViewItem();
+            lvi3.PreviewMouseDown += new MouseButtonEventHandler(listViewItemMouseDown);
+            ListViewItem lvi4 = new ListViewItem();
+            ListViewItem lvi5 = new ListViewItem();
+
+
+            if (person.isEmergency)
+            {
+                lvi3.Content = "Acil";
+                lvMenu.Items.Add(lvi3);
+                lvi4.PreviewMouseDown += new MouseButtonEventHandler(listViewItemMouseDown);
+                lvi4.Content = person.grievance;
+                lvMenu.Items.Add(lvi4);
+            }
+            else {
+                lvi3.Content = "Acil Değil";
+                lvMenu.Items.Add(lvi3);
+                lvi4.PreviewMouseDown += new MouseButtonEventHandler(listViewItemMouseDown);
+                lvi4.Content = person.grievance;
+                lvMenu.Items.Add(lvi4);
+                lvi5.PreviewMouseDown += new MouseButtonEventHandler(listViewItemMouseDown);
+                if (person.hasAppointment)
+                {
+                    lvi5.Content = "Randevu Var";
+                }
+                else {
+                    lvi5.Content = "Randevu Yok";
+                }
+                lvMenu.Items.Add(lvi5);
+
+            }
+          
+
             TBQuestion.Text = "Lütfen İsminizi Yazınız";
             meMainVideo.Source = new System.Uri("SignVideos/Directions/LutfenSizIsminiziYaziniz.mp4", UriKind.Relative);
             isRepeated = true;
@@ -557,7 +843,6 @@ namespace InterfaceForHI
             spInput.Visibility = System.Windows.Visibility.Visible;
             bName.Visibility = System.Windows.Visibility.Visible;
 
-            isSvAnswersVisible = false;
             restartVideo();
         }
 
@@ -566,6 +851,11 @@ namespace InterfaceForHI
             person.otherPatientName = tbName.Text;
             person.programFlow = person.programFlow + "Ziyaret etmek istediği hastanın ismi: " + tbName.Text + "\n";
             System.Diagnostics.Debug.WriteLine(person.programFlow);
+            ListViewItem lvi = new ListViewItem();
+            lvMenu.Items.Add(lvi);
+            lvi.PreviewMouseDown += new MouseButtonEventHandler(listViewItemMouseDown);
+            lvi.Content = "Hasta İsmi";
+
             loadDirection2();
             bOtherName.Visibility = System.Windows.Visibility.Hidden;
             spInput.Visibility = System.Windows.Visibility.Hidden;
@@ -575,13 +865,45 @@ namespace InterfaceForHI
 
         private void bName_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+
             person.name = tbName.Text;
             person.programFlow = person.programFlow + "Hastanın ismi: " + tbName.Text +"\n";
             System.Diagnostics.Debug.WriteLine(person.programFlow);
+            ListViewItem lvi = new ListViewItem();
+            lvMenu.Items.Add(lvi);
+            lvi.PreviewMouseDown += new MouseButtonEventHandler(listViewItemMouseDown);
+            lvi.Content = "İsim";
+
             loadDirection2();
             bName.Visibility = System.Windows.Visibility.Hidden;
             spInput.Visibility = System.Windows.Visibility.Hidden;
 
+        }
+
+        private void bClose_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            person.printOut();
+            Application.Current.Shutdown();
+        }
+
+        private void I_Prev_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (I_Prev.Visibility.Equals(System.Windows.Visibility.Visible))
+            {
+                spInput.Visibility = System.Windows.Visibility.Hidden;
+                bClose.Visibility = System.Windows.Visibility.Hidden;
+            }
+        }
+
+        private void IDropdown_ico_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (lvMenu.Visibility.Equals(System.Windows.Visibility.Visible))
+            {
+                lvMenu.Visibility = System.Windows.Visibility.Hidden;
+            }
+            else {
+                lvMenu.Visibility = System.Windows.Visibility.Visible;
+            }
         }
     }
 
@@ -607,6 +929,40 @@ namespace InterfaceForHI
             {
                 FileStream fs = new FileStream(filePath, FileMode.Append, FileAccess.Write);
                 StreamWriter objWrite = new StreamWriter(fs);
+                objWrite.WriteLine("Kisi Bilgileri:");
+                if (this.isSeekingInfo) {
+                    objWrite.WriteLine("Bu kisi bilgi istiyor.");
+                    objWrite.WriteLine("Istedigi bilgi: "+this.soughtInfo);
+                    if (this.soughtInfo.Equals("Hasta Ziyareti İçin Geldim"))
+                    {
+                        objWrite.WriteLine("Ziyaret etmek istedigi hastanin ismi: " + this.otherPatientName);
+                    }
+
+                }
+                else if (this.isSick) {
+                    objWrite.WriteLine("Bu kisi hasta.");
+                    if (this.isEmergency)
+                    {
+                        objWrite.WriteLine("Durumu acil.");
+                    }
+                    else {
+                        objWrite.WriteLine("Durumu acil degil.");
+                    }
+                    objWrite.WriteLine("Sikayeti: "+this.grievance);
+                    if (!this.isEmergency) {
+                        if (this.hasAppointment)
+                        {
+                            objWrite.WriteLine("Rendevusu var.");
+                        }
+                        else {
+                            objWrite.WriteLine("Randevusu yok.");
+                        }
+                    }
+                    objWrite.WriteLine("Hastanin ismi: "+this.name);
+
+
+                }
+                objWrite.WriteLine("Program Akisi:");
                 objWrite.Write(this.programFlow);
                 objWrite.Close();
             }
@@ -614,6 +970,45 @@ namespace InterfaceForHI
             {
                 FileStream fs = new FileStream(filePath, FileMode.Create, FileAccess.Write);
                 StreamWriter objWrite = new StreamWriter(fs);
+                objWrite.WriteLine("Kisi Bilgileri:");
+                if (this.isSeekingInfo)
+                {
+                    objWrite.WriteLine("Bu kisi bilgi istiyor.");
+                    objWrite.WriteLine("Istedigi bilgi: " + this.soughtInfo);
+                    if (this.soughtInfo.Equals("Hasta Ziyareti İçin Geldim"))
+                    {
+                        objWrite.WriteLine("Ziyaret etmek istedigi hastanin ismi: " + this.otherPatientName);
+                    }
+
+                }
+                else if (this.isSick)
+                {
+                    objWrite.WriteLine("Bu kisi hasta.");
+                    if (this.isEmergency)
+                    {
+                        objWrite.WriteLine("Durumu acil.");
+                    }
+                    else
+                    {
+                        objWrite.WriteLine("Durumu acil degil.");
+                    }
+                    objWrite.WriteLine("Sikayeti: " + this.grievance);
+                    if (!this.isEmergency)
+                    {
+                        if (this.hasAppointment)
+                        {
+                            objWrite.WriteLine("Rendevusu var.");
+                        }
+                        else
+                        {
+                            objWrite.WriteLine("Randevusu yok.");
+                        }
+                    }
+                    objWrite.WriteLine("Hastanin ismi: " + this.name);
+
+
+                }
+                objWrite.WriteLine("Program Akisi:");
                 objWrite.Write(this.programFlow);
                 objWrite.Close();
             }

@@ -57,7 +57,8 @@
                        HorizontalAlignment="Left"
                        Width="64"
                        Height="64"
-                       Margin="32 0 0 0"/>
+                       Margin="32 0 0 0"
+                       PreviewMouseLeftButtonDown="IDropdown_ico_PreviewMouseLeftButtonDown"/>
                 <Image Name="IUser_ico" Source="assets/icon/user_ico.png"
                        HorizontalAlignment="Right"
                        Width="64"
@@ -68,6 +69,21 @@
         </Grid>
         <Grid Grid.Row="1">
             <Border Background="{StaticResource GrayBrush}"/>
+            <Grid HorizontalAlignment="Left" Panel.ZIndex="1">
+                <ListView 
+                Name="lvMenu"
+                HorizontalAlignment="Left"
+                Width="280"
+                Background="{StaticResource WhiteBrush}"
+                Margin="100 0 0 0"
+                FontSize="24"
+                BorderBrush="{StaticResource BlackBrush}"
+                BorderThickness="3"
+                Visibility="Hidden"/>
+            </Grid>
+           
+
+
             <Grid HorizontalAlignment="Center" Width="960">
                 <Border Background="{StaticResource WhiteBrush}"/>
                 <Grid VerticalAlignment="Bottom">
@@ -112,7 +128,8 @@
                        VerticalAlignment="Top"
                        Width="64"
                        Height="240"
-                       MouseLeftButtonDown="I_Prev_MouseLeftButtonDown"/>
+                       MouseLeftButtonDown="I_Prev_MouseLeftButtonDown"
+                       IsVisibleChanged="I_Prev_IsVisibleChanged"/>
                 </Grid>
                 <Grid HorizontalAlignment="Center" Width="960" Height="350">
                     <ScrollViewer Visibility="Hidden" IsVisibleChanged="svAnswers_IsVisibleChanged" Name="svAnswers" VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Hidden" VerticalAlignment="Top">
@@ -155,7 +172,18 @@
                            >
                         </Button>
                     </StackPanel>
-                    
+                    <Button 
+                            Name="bClose"
+                            Style="{StaticResource RoundButtonTemplate}"
+                            Height="48"
+                            Width="100"
+                            FontSize="24"
+                            Background="Transparent"
+                            Content="Çıkış"
+                            Visibility="Hidden"
+                            PreviewMouseDown="bClose_PreviewMouseDown"
+                           >
+                    </Button>
                 </Grid>
 
                 <Grid HorizontalAlignment="Right">
