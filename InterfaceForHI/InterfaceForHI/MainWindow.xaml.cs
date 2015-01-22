@@ -147,7 +147,7 @@ namespace InterfaceForHI
             me.LoadedBehavior = System.Windows.Controls.MediaState.Manual;
             me.MediaEnded += new RoutedEventHandler(AnswerMediaEnded);
             me.MouseLeftButtonDown += new MouseButtonEventHandler(AnswerMediaMouseLeftButtonDown);
-            me.Stretch = Stretch.Uniform;
+            //me.Stretch = Stretch.Uniform;
 
         }
         private void initializeAnswerTextProperties(object sender, RoutedEventArgs args)
@@ -406,11 +406,19 @@ namespace InterfaceForHI
         {
             svAnswers.LineRight();
             incrementVideoTrickCount();
+            svAnswers.LineRight();
+            incrementVideoTrickCount();
+            svAnswers.LineRight();
+            incrementVideoTrickCount();
         }
 
         private void I_Prev_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
 
+            svAnswers.LineLeft();
+            decrementVideoTrickCount();
+            svAnswers.LineLeft();
+            decrementVideoTrickCount();
             svAnswers.LineLeft();
             decrementVideoTrickCount();
 
@@ -579,7 +587,9 @@ namespace InterfaceForHI
             svAnswers.Visibility = System.Windows.Visibility.Hidden;
             ListViewItem lvi = new ListViewItem();
             lvi.PreviewMouseDown += new MouseButtonEventHandler(listViewItemMouseDown);
+            String programFlow = person.programFlow;
             person = new Person();
+            person.programFlow = programFlow;
             lvi.Content = "Giriş";
             lvMenu.Items.Clear();
             lvMenu.Items.Add(lvi);
