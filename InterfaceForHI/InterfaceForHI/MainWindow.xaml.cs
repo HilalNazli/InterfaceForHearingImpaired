@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,6 +17,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Microsoft.Kinect;
+
+
 
 namespace InterfaceForHI
 {
@@ -21,6 +28,24 @@ namespace InterfaceForHI
     /// </summary>
     public partial class MainWindow : Window
     {
+
+        /////////////////////////////////////////////////////////
+        /// Active Kinect sensor
+        private KinectSensor kinectSensor = null;
+
+        /// Size of the RGB pixel in the bitmap
+        private readonly int bytesPerPixel = (PixelFormats.Bgr32.BitsPerPixel + 7) / 8;
+
+        // MultiSourceFrame Variables
+        MultiSourceFrameReader myMultiSourceFrameReader = null;
+        FrameSourceTypes myFrameSources = FrameSourceTypes.Color;
+
+
+        // Color Image Variables
+        private WriteableBitmap colorImageBitmap = null;
+        private byte[] colorImage = null;
+        /////////////////////////////////////////////////////////
+
         Person person = new Person();
         double ratio = 0;
         Boolean isRepeated = false;
@@ -31,6 +56,27 @@ namespace InterfaceForHI
         double svAnswersHorizontalOffset = 0;
         public MainWindow()
         {
+            /////////////////////////////////////////////////////////
+            // for Alpha, one sensor is supported
+            this.kinectSensor = KinectSensor.GetDefault();
+
+            if (this.kinectSensor != null)
+            {
+
+                // open the sensor
+                this.kinectSensor.Open();
+
+                // Display Multi Source Frame Reader
+                this.myMultiSourceFrameReader = this.kinectSensor.OpenMultiSourceFrameReader(myFrameSources);
+
+                // Color Variable Initialization
+                FrameDescription colorFrameDescription = this.kinectSensor.ColorFrameSource.FrameDescription;
+                this.colorImage = new byte[colorFrameDescription.Width * colorFrameDescription.Height * this.bytesPerPixel];
+                this.colorImageBitmap = new WriteableBitmap(colorFrameDescription.Width, colorFrameDescription.Height, 96.0, 96.0, PixelFormats.Bgr32, null);
+
+            }
+            /////////////////////////////////////////////////////////
+
             InitializeComponent();
             mainWindow.WindowState = WindowState.Maximized;
             ratio = System.Windows.SystemParameters.PrimaryScreenHeight/mainWindow.Height;
@@ -41,7 +87,70 @@ namespace InterfaceForHI
 
             loadQuestion1();
             initializeSizes(ratio);
+
+            this.imgDisplayImage.Source = colorImageSource;
         }
+        public ImageSource colorImageSource
+        {
+            get
+            {
+                return this.colorImageBitmap;
+            }
+        }
+
+        /// Execute start up tasks
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (this.myMultiSourceFrameReader != null)
+            {
+                this.myMultiSourceFrameReader.MultiSourceFrameArrived += this.Reader_DisplayMultiSourceFrameArrived;
+            }
+        }
+
+
+        private void Reader_DisplayMultiSourceFrameArrived(Object sender, MultiSourceFrameArrivedEventArgs e)
+        {
+            MultiSourceFrameReference multiSourceFrameReference = e.FrameReference;
+
+            MultiSourceFrame multiSourceFrame = multiSourceFrameReference.AcquireFrame();
+
+            if (multiSourceFrame == null) return;
+
+            // Get FrameReferences for each source
+            ColorFrameReference colorFrameReference = multiSourceFrame.ColorFrameReference;
+
+            using (ColorFrame colorFrame = colorFrameReference.AcquireFrame())
+            {
+                if (colorFrame == null) return;
+
+
+                FrameDescription colorFrameDescription = colorFrame.FrameDescription;
+
+                #region colorFrame processing
+
+                // verify data and write the new color frame data to the display bitmap
+                if ((colorFrameDescription.Width == this.colorImageBitmap.PixelWidth) &&
+                    (colorFrameDescription.Height == this.colorImageBitmap.PixelHeight))
+                {
+                    if (colorFrame.RawColorImageFormat == ColorImageFormat.Bgra)
+                    {
+                        colorFrame.CopyRawFrameDataToArray(this.colorImage);
+                    }
+                    else
+                    {
+                        colorFrame.CopyConvertedFrameDataToArray(this.colorImage, ColorImageFormat.Bgra);
+                    }
+
+                    this.colorImageBitmap.WritePixels(
+                        new Int32Rect(0, 0, colorFrameDescription.Width, colorFrameDescription.Height),
+                        this.colorImage,
+                        colorFrameDescription.Width * this.bytesPerPixel,
+                        0);
+                }
+                #endregion
+            }
+        }
+
         private void initializeSizes(double ratio)
         {
            
@@ -85,6 +194,8 @@ namespace InterfaceForHI
             double widthOfBName = 100;
             double fontOfBName = 24;
 
+            double heightOfMeMainVideo = 480;
+
             double widthOfLVMenu = 280;
             //Resize everything with THE ratio yeah!
             mainWindow.IDropdown_ico.Height = heightOfIDropdown_ico * ratio;
@@ -120,7 +231,8 @@ namespace InterfaceForHI
             mainWindow.TBProject.FontSize = fontSizeOfTBProject * ratio;
 
            // mainWindow.meMainVideo.Height = mainWindow.Row1.ActualHeight; 
-            mainWindow.meMainVideo.Height = meMainVideo.Height * ratio;
+            mainWindow.meMainVideo.Height = heightOfMeMainVideo * ratio;
+            mainWindow.imgDisplayImage.Height = heightOfMeMainVideo * ratio;
             //Resize margins
 
             tbName.Height = heightOfTBName * ratio;
@@ -966,6 +1078,16 @@ namespace InterfaceForHI
 
     public class Person
     {
+        public string name;
+        public Boolean isSick;
+        public Boolean isSeekingInfo;
+        public Boolean isEmergency;
+        public Boolean hasAppointment;
+        public string otherPatientName;
+        public string grievance;
+        public string soughtInfo;
+        public string programFlow;
+
         public Person()
         {
             this.name = "";
@@ -1070,15 +1192,5 @@ namespace InterfaceForHI
                 objWrite.Close();
             }
         }
-
-        public string name;
-        public Boolean isSick;
-        public Boolean isSeekingInfo;
-        public Boolean isEmergency;
-        public Boolean hasAppointment;
-        public string otherPatientName;
-        public string grievance;
-        public string soughtInfo;
-        public string programFlow;
     }
 }
