@@ -13,8 +13,10 @@
         <SolidColorBrush x:Key="BlackBrush_" Color="#272626" />
         <SolidColorBrush x:Key="GrayBrush" Color="#cdcdcd" />
         <SolidColorBrush x:Key="WhiteBrush" Color="#ffffff" />
-        <SolidColorBrush x:Key="OrangBrush" Color="#d06713" />
-        <SolidColorBrush x:Key="OrangBrush_" Color="#ff7e17" />
+        <SolidColorBrush x:Key="OrangeBrush" Color="#d06713" />
+        <SolidColorBrush x:Key="OrangeBrush_" Color="#ff7e17" />
+        <SolidColorBrush x:Key="GreenBrush" Color="#05cb46" />
+        <SolidColorBrush x:Key="GreenBrush_" Color="#00ff48" />
         <SolidColorBrush x:Key="WhitePen" Color="#ffffff" />
         <SolidColorBrush x:Key="BlackPen" Color="#404040" />
         <SolidColorBrush x:Key="BlackPen_" Color="#a3a3a3" />
@@ -23,7 +25,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border CornerRadius="10" BorderBrush="{StaticResource OrangBrush_}"
+                        <Border CornerRadius="10" BorderBrush="{StaticResource OrangeBrush_}"
                                 BorderThickness="3">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center">
 
@@ -114,9 +116,9 @@
             </Grid>
         </Grid>
         <Grid Grid.Row="2">
-            <Border Background="{StaticResource OrangBrush}"/>
+            <Border Name="MiddleLineBorder" Background="{StaticResource OrangeBrush}"/>
             <Grid HorizontalAlignment="Center" Width="960">
-                <Border Background="{StaticResource OrangBrush_}"/>
+                <Border Name="MiddleLineBorder_" Background="{StaticResource OrangeBrush_}"/>
                 <TextBlock 
                     Name="TBQuestion"
                     Margin="32 0 0 0"
@@ -209,9 +211,9 @@
 
         </Grid>
         <Grid Grid.Row="4">
-            <Border Background="{StaticResource OrangBrush}"/>
+            <Border Background="{StaticResource OrangeBrush}"/>
             <Grid Width="960" HorizontalAlignment="Center">
-                <Border Background="{StaticResource OrangBrush_}"/>
+                <Border Background="{StaticResource OrangeBrush_}"/>
             </Grid>
         </Grid>
         <Grid Grid.Row="5">

@@ -24,7 +24,7 @@ using Microsoft.Kinect;
 namespace InterfaceForHI
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// 
     /// </summary>
     public partial class MainWindow : Window
     {
@@ -54,6 +54,9 @@ namespace InterfaceForHI
         int letItLoadCount = 0;
         int videoTrickCount = 0;
         double svAnswersHorizontalOffset = 0;
+
+        System.Windows.Threading.DispatcherTimer dispatcherTimerForCamera = new System.Windows.Threading.DispatcherTimer();
+
         public MainWindow()
         {
             /////////////////////////////////////////////////////////
@@ -84,6 +87,11 @@ namespace InterfaceForHI
             mainWindow.Width = System.Windows.SystemParameters.PrimaryScreenWidth;
             mainWindow.Height = System.Windows.SystemParameters.PrimaryScreenHeight;
 
+
+
+            //1- Question is loaded and played once(or twice)
+            //2- Answers are shown. Camera is on, for 5 seconds.
+            //3- Question is shown again (for now). 
 
             loadQuestion1();
             initializeSizes(ratio);
@@ -470,9 +478,25 @@ namespace InterfaceForHI
                 }
             }
             
-            restartVideo();
+            //restartVideo();
             
             isRepeated = true;
+
+            //
+            //Do not restart.
+            //When the media is ended, make it hidden, so that the user can see himself/herself on the screen.
+            //Set timer to 5 seconds. Record the user for 5 seconds and then restrart the video.
+            mainWindow.meMainVideo.Visibility = System.Windows.Visibility.Hidden;
+            mainWindow.imgDisplayImage.Visibility = System.Windows.Visibility.Visible;
+            mainWindow.MiddleLineBorder.Background = (System.Windows.Media.Brush)mainWindow.Resources["GreenBrush"];
+            mainWindow.MiddleLineBorder_.Background = (System.Windows.Media.Brush)mainWindow.Resources["GreenBrush_"];
+
+            //Recording
+            dispatcherTimerForCamera.Tick += new EventHandler(dispatcherTimer_forCamera_Tick);
+            dispatcherTimerForCamera.Interval = new TimeSpan(0, 0, 5);
+            dispatcherTimerForCamera.Start();
+
+
 
         }
         public void playAllChildren(StackPanel stackPanel)
@@ -586,6 +610,22 @@ namespace InterfaceForHI
                 svAnswersHorizontalOffset = svAnswers.HorizontalOffset;
             }
         }
+
+        private void dispatcherTimer_forCamera_Tick(object sender, EventArgs e) {
+            //StopRecording
+            //Restart the question video for now.
+            //Later we will process what we've recorded.
+
+            mainWindow.meMainVideo.Visibility = System.Windows.Visibility.Visible;
+            mainWindow.imgDisplayImage.Visibility = System.Windows.Visibility.Hidden;
+
+            mainWindow.MiddleLineBorder.Background = (System.Windows.Media.Brush)mainWindow.Resources["OrangeBrush"];
+            mainWindow.MiddleLineBorder_.Background = (System.Windows.Media.Brush)mainWindow.Resources["OrangeBrush_"];
+            restartVideo();
+            dispatcherTimerForCamera.Stop();
+
+
+        }
         private void videoTrick(StackPanel stackPanel, int videoOff, Boolean isIncrement)
         {
             foreach (Grid g in stackPanel.Children)
@@ -662,6 +702,15 @@ namespace InterfaceForHI
         }
 
         private void loadQuestion(String question, String questionPath, int answersCount, String[] answers, String[] answersPath) {
+            //If clicked when camera is on.
+            dispatcherTimerForCamera.Stop();
+
+            mainWindow.meMainVideo.Visibility = System.Windows.Visibility.Visible;
+            mainWindow.imgDisplayImage.Visibility = System.Windows.Visibility.Hidden;
+
+            mainWindow.MiddleLineBorder.Background = (System.Windows.Media.Brush)mainWindow.Resources["OrangeBrush"];
+            mainWindow.MiddleLineBorder_.Background = (System.Windows.Media.Brush)mainWindow.Resources["OrangeBrush_"];
+
             //Set the question in the main video
             TBQuestion.Text = question;
             meMainVideo.Source = new System.Uri(questionPath, UriKind.Relative);
@@ -766,7 +815,7 @@ namespace InterfaceForHI
             lvMenu.Items.Add(lvi2);
             I_Next.Visibility = System.Windows.Visibility.Visible;
             I_Prev.Visibility = System.Windows.Visibility.Visible;
-            String question = "Acil Mi?";
+            String question = "Acil mi?";
             String questionPath = "SignVideos/Questions/Question3/AcilMi.mp4";
             int answersCount = 2;
             String[] answers = new String[] { 
@@ -907,7 +956,7 @@ namespace InterfaceForHI
 
             I_Next.Visibility = System.Windows.Visibility.Visible;
             I_Prev.Visibility = System.Windows.Visibility.Visible;
-            String question = "Randevunuz Var Mı?";
+            String question = "Randevunuz Var mı?";
             String questionPath = "SignVideos/Questions/Question5/SizinRandevunuzVarMi.mp4";
             int answersCount = 2;
             String[] answers = new String[] { 
