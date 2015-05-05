@@ -10,8 +10,8 @@
     using System.Windows.Media;
     using System.Windows.Media.Imaging;
     using Microsoft.Kinect;
-   // using Emgu.CV;
-   // using Emgu.CV.Structure;
+    using Emgu.CV;
+    using Emgu.CV.Structure;
     using System.Windows.Controls;
     using System.Threading;
 
@@ -20,6 +20,9 @@
 
         private const int MapDepthToByte = 8000 / 256;
 
+        //If not fired after some time, check the following issue:
+        //https://social.msdn.microsoft.com/Forums/en-US/608d1bac-059c-4ea5-aa28-8c2f9ebb88c7/kinect-is-not-firing-multisourceframearrived-event-after-some-time?forum=kinectv2sdk
+        //Hope you'll not need it.
         private void Reader_RecordMultiSourceFrameArrived(Object sender, MultiSourceFrameArrivedEventArgs e)
         {
 
@@ -84,15 +87,25 @@
                 colorFrame.CopyConvertedFrameDataToArray(this.colorImage, ColorImageFormat.Bgra);
             }
 
+            try {
+                colorFrameBGRA.Bytes = colorImage;
+           
+                colorFrameBGR = colorFrameBGRA.Convert<Bgr, Byte>();
+                vwColor.WriteFrame(colorFrameBGR);
+            }
+            catch (Exception ee)
+            {
+                Console.WriteLine("{0} Exception caught.", ee);
+            }
             this.colorImageBitmap.WritePixels(
                 new Int32Rect(0, 0, colorFrameDescription.Width, colorFrameDescription.Height),
                 this.colorImage,
                 colorFrameDescription.Width * this.bytesPerPixel,
                 0);
-            
+            colorFrame.Dispose();
+
 
             #endregion 
-            colorFrame.Dispose();
              
         }
 

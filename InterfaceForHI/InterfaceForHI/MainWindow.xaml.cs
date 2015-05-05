@@ -1,28 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using Microsoft.Kinect;
-
-
-
-namespace InterfaceForHI
+﻿namespace InterfaceForHI
 {
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.Diagnostics;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using System.Windows;
+    using System.Windows.Controls;
+    using System.Windows.Data;
+    using System.Windows.Documents;
+    using System.Windows.Input;
+    using System.Windows.Media;
+    using System.Windows.Media.Imaging;
+    using System.Windows.Navigation;
+    using System.Windows.Shapes;
+    using Microsoft.Kinect;
+
+    using Emgu.CV;
+    using Emgu.CV.Structure;
+
+
     /// <summary>
     /// 
     /// </summary>
@@ -53,10 +55,12 @@ namespace InterfaceForHI
        
 
         #region Variables
-
         // Color Image Variables
         private WriteableBitmap colorImageBitmap = null;
         private byte[] colorImage = null;
+        // Following two are for video recording
+        private Emgu.CV.Image<Bgr, Byte> colorFrameBGR = null;
+        private Emgu.CV.Image<Bgra, Byte> colorFrameBGRA = null;
 
         // Infrared Image Variables
         private WriteableBitmap infraredImageBitmap = null;
@@ -78,6 +82,10 @@ namespace InterfaceForHI
         private WriteableBitmap bodyIndexImageBitmap = null;
         private byte[] bodyIndexFrameData = null;
 
+
+        // Video Writers
+        VideoWriter vwColor = null;
+        //No depth video for now
 
         #endregion
 
@@ -562,33 +570,41 @@ namespace InterfaceForHI
 
             //StartRecording
             recording = true;
+            Thread.Sleep(100);
+
             nFrames = 0;
             long time = DateTime.Now.Ticks;
             folderPath = "C:\\record" + time + "\\";
+            string localPath = new Uri(folderPath).LocalPath;
             Directory.CreateDirectory(folderPath);
             //null control
 
             FrameSourceTypes recordFrameSources = FrameSourceTypes.Color | FrameSourceTypes.Depth | FrameSourceTypes.Body;
 
 
-           Thread.Sleep(200);
-
-           if (recordMultiSourceFrameReader == null)
+           Thread.Sleep(100);
+           try
            {
-               // Open the recorder MultiSourceFrameReader.
-               this.recordMultiSourceFrameReader = this.kinectSensor.OpenMultiSourceFrameReader(recordFrameSources);
-               this.recordMultiSourceFrameReader.MultiSourceFrameArrived += this.Reader_RecordMultiSourceFrameArrived;
-               //this.recordMultiSourceFrameReader.MultiSourceFrameArrived += this.Reader_DisplayMultiSourceFrameArrived;
-
-
-               dispatcherTimerForCamera.Tick += new EventHandler(dispatcherTimer_forCamera_Tick);
-               dispatcherTimerForCamera.Interval = new TimeSpan(0, 0, 5);
-               dispatcherTimerForCamera.Start();
-
+               FrameDescription colorFrameDescription = this.kinectSensor.ColorFrameSource.FrameDescription;
+               this.colorFrameBGR = new Emgu.CV.Image<Bgr, Byte>(colorFrameDescription.Width, colorFrameDescription.Height);
+               this.colorFrameBGRA = new Emgu.CV.Image<Bgra, Byte>(colorFrameDescription.Width, colorFrameDescription.Height);
+               this.vwColor = new VideoWriter(localPath + "color.avi", 30, colorFrameDescription.Width, colorFrameDescription.Height, true);
            }
-           else {
-               System.Console.WriteLine("UPS!!!");
+           catch (Exception ee)
+           {
+               Console.WriteLine("{0} Exception caught.", ee);
            }
+            // Open the recorder MultiSourceFrameReader.
+            this.recordMultiSourceFrameReader = this.kinectSensor.OpenMultiSourceFrameReader(recordFrameSources);
+            this.recordMultiSourceFrameReader.MultiSourceFrameArrived += this.Reader_RecordMultiSourceFrameArrived;
+            //this.recordMultiSourceFrameReader.MultiSourceFrameArrived += this.Reader_DisplayMultiSourceFrameArrived;
+           
+
+
+            dispatcherTimerForCamera.Tick += new EventHandler(dispatcherTimer_forCamera_Tick);
+            dispatcherTimerForCamera.Interval = new TimeSpan(0, 0, 5);
+            dispatcherTimerForCamera.Start();
+
 
         }
 
@@ -733,9 +749,12 @@ namespace InterfaceForHI
             dispatcherTimerForCamera.Stop();
 
             //StopRecording
+            // Here, blurr the screen and status: processing your answer
+
             //Restart the question video for now.
             //Later we will process what we've recorded.
             recording = false;
+          
 
             // Dispose the Recording MultiSourceFrameReader.
             if (recordMultiSourceFrameReader != null)
@@ -747,6 +766,28 @@ namespace InterfaceForHI
 
             File.WriteAllText(folderPath + "body.csv", myCSVwriter.ToString());
             myCSVwriter.Clear();
+
+            if (vwColor != null) vwColor.Dispose();
+            //Compression
+            System.Diagnostics.Process process = new System.Diagnostics.Process();
+            System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
+
+            startInfo.WorkingDirectory = @folderPath;
+            startInfo.FileName = "cmd.exe";
+
+            // Slow Lossly Compression
+            //startInfo.Arguments = "/C ffmpeg -i color.avi color.mp4 & ffmpeg -i depth.avi depth.mp4 & del color.avi & del depth.avi";
+
+            // Fastest Lossless Compresion
+            //startInfo.Arguments = "/C ffmpeg -i color.avi -c:v libx264 -preset ultrafast -qp 0 color.mkv & ffmpeg -i depth.avi -c:v libx264 -preset ultrafast -qp 0 depth.mkv & del color.avi & del depth.avi";
+
+            startInfo.Arguments = "/C ffmpeg -i color.avi -c:v libx264 -preset ultrafast -qp 0 color.mkv";
+
+            process.StartInfo = startInfo;
+            process.Start();
+
+            if (colorFrameBGR != null) colorFrameBGR.Dispose();
+            if (colorFrameBGRA != null) colorFrameBGRA.Dispose();
 
             mainWindow.meMainVideo.Visibility = System.Windows.Visibility.Visible;
             mainWindow.imgDisplayImage.Visibility = System.Windows.Visibility.Hidden;
