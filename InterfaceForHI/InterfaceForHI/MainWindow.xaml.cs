@@ -26,7 +26,7 @@ namespace InterfaceForHI
     /// <summary>
     /// 
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
 
         /////////////////////////////////////////////////////////
@@ -36,15 +36,57 @@ namespace InterfaceForHI
         /// Size of the RGB pixel in the bitmap
         private readonly int bytesPerPixel = (PixelFormats.Bgr32.BitsPerPixel + 7) / 8;
 
+
         // MultiSourceFrame Variables
-        MultiSourceFrameReader myMultiSourceFrameReader = null;
+        MultiSourceFrameReader displayMultiSourceFrameReader = null;
+        MultiSourceFrameReader recordMultiSourceFrameReader = null;
         FrameSourceTypes myFrameSources = FrameSourceTypes.Color;
 
+        StringBuilder myCSVwriter = new StringBuilder();
+        string folderPath = "";
+
+        int nFrames = 0;
+
+
+        /// Current status text to display
+        private string statusText = null;
+       
+
+        #region Variables
 
         // Color Image Variables
         private WriteableBitmap colorImageBitmap = null;
         private byte[] colorImage = null;
+
+        // Infrared Image Variables
+        private WriteableBitmap infraredImageBitmap = null;
+        private byte[] infraredPixels = null;
+        private ushort[] infraredFrameData = null;
+
+        // Depth Image Variables
+        private WriteableBitmap depthImageBitmap = null;
+        private byte[] depthPixels = null;
+        private byte[] depthVideoFrames = null;
+        private ushort[] depthFrameData = null;
+
+        private CoordinateMapper coordinateMapper = null;
+        private Body[] bodies = null;
+
+        // Body Index
+        private byte[] displayPixels = null;
+        private ColorSpacePoint[] colorPoints = null;
+        private WriteableBitmap bodyIndexImageBitmap = null;
+        private byte[] bodyIndexFrameData = null;
+
+
+        #endregion
+
+
         /////////////////////////////////////////////////////////
+
+        // Record Flags
+        private Boolean recording = false;
+
 
         Person person = new Person();
         double ratio = 0;
@@ -70,13 +112,35 @@ namespace InterfaceForHI
                 this.kinectSensor.Open();
 
                 // Display Multi Source Frame Reader
-                this.myMultiSourceFrameReader = this.kinectSensor.OpenMultiSourceFrameReader(myFrameSources);
+                this.displayMultiSourceFrameReader = this.kinectSensor.OpenMultiSourceFrameReader(myFrameSources);
 
                 // Color Variable Initialization
                 FrameDescription colorFrameDescription = this.kinectSensor.ColorFrameSource.FrameDescription;
                 this.colorImage = new byte[colorFrameDescription.Width * colorFrameDescription.Height * this.bytesPerPixel];
                 this.colorImageBitmap = new WriteableBitmap(colorFrameDescription.Width, colorFrameDescription.Height, 96.0, 96.0, PixelFormats.Bgr32, null);
 
+                // Infrared Variable Initialization
+                FrameDescription infraredFrameDescription = this.kinectSensor.InfraredFrameSource.FrameDescription;
+                this.infraredFrameData = new ushort[infraredFrameDescription.Width * infraredFrameDescription.Height];
+                this.infraredPixels = new byte[infraredFrameDescription.Width * infraredFrameDescription.Height * this.bytesPerPixel];
+                this.infraredImageBitmap = new WriteableBitmap(infraredFrameDescription.Width, infraredFrameDescription.Height, 96.0, 96.0, PixelFormats.Bgr32, null);
+
+                // Depth Variable Initialization 
+                FrameDescription depthFrameDescription = this.kinectSensor.DepthFrameSource.FrameDescription;
+                this.depthPixels = new byte[depthFrameDescription.Width * depthFrameDescription.Height * this.bytesPerPixel];
+                this.depthFrameData = new ushort[depthFrameDescription.Width * depthFrameDescription.Height];
+                this.depthImageBitmap = new WriteableBitmap(depthFrameDescription.Width, depthFrameDescription.Height, 96.0, 96.0, PixelFormats.Bgr32, null);
+
+                // Body Variable Initialization
+                this.coordinateMapper = this.kinectSensor.CoordinateMapper;
+                this.bodies = new Body[6]; //[this.kinectSensor.BodyFrameSource.BodyCount];
+
+                // Boody Index
+                this.bodyIndexFrameData = new byte[depthFrameDescription.Width * depthFrameDescription.Height];
+                this.displayPixels = new byte[depthFrameDescription.Width * depthFrameDescription.Height * this.bytesPerPixel];
+                this.colorPoints = new ColorSpacePoint[depthFrameDescription.Width * depthFrameDescription.Height];
+                this.bodyIndexImageBitmap = new WriteableBitmap(depthFrameDescription.Width, depthFrameDescription.Height, 96.0, 96.0, PixelFormats.Bgra32, null);
+                
             }
             /////////////////////////////////////////////////////////
 
@@ -109,13 +173,15 @@ namespace InterfaceForHI
         /// Execute start up tasks
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            if (this.myMultiSourceFrameReader != null)
+            //Erase later.
+            if (this.displayMultiSourceFrameReader != null)
             {
-                this.myMultiSourceFrameReader.MultiSourceFrameArrived += this.Reader_DisplayMultiSourceFrameArrived;
+                //this.displayMultiSourceFrameReader.MultiSourceFrameArrived += this.Reader_DisplayMultiSourceFrameArrived;
             }
         }
 
-
+        //Erase later.
+        /*
         private void Reader_DisplayMultiSourceFrameArrived(Object sender, MultiSourceFrameArrivedEventArgs e)
         {
             MultiSourceFrameReference multiSourceFrameReference = e.FrameReference;
@@ -157,7 +223,7 @@ namespace InterfaceForHI
                 }
                 #endregion
             }
-        }
+        }*/
 
         private void initializeSizes(double ratio)
         {
@@ -491,13 +557,65 @@ namespace InterfaceForHI
             mainWindow.MiddleLineBorder.Background = (System.Windows.Media.Brush)mainWindow.Resources["GreenBrush"];
             mainWindow.MiddleLineBorder_.Background = (System.Windows.Media.Brush)mainWindow.Resources["GreenBrush_"];
 
-            //Recording
-            dispatcherTimerForCamera.Tick += new EventHandler(dispatcherTimer_forCamera_Tick);
-            dispatcherTimerForCamera.Interval = new TimeSpan(0, 0, 5);
-            dispatcherTimerForCamera.Start();
+
+            //System.Console.WriteLine("nFram1e:" + nFrames);
+
+            //StartRecording
+            recording = true;
+            nFrames = 0;
+            long time = DateTime.Now.Ticks;
+            folderPath = "C:\\record" + time + "\\";
+            Directory.CreateDirectory(folderPath);
+            //null control
+
+            FrameSourceTypes recordFrameSources = FrameSourceTypes.Color | FrameSourceTypes.Depth | FrameSourceTypes.Body;
 
 
+           Thread.Sleep(200);
 
+           if (recordMultiSourceFrameReader == null)
+           {
+               // Open the recorder MultiSourceFrameReader.
+               this.recordMultiSourceFrameReader = this.kinectSensor.OpenMultiSourceFrameReader(recordFrameSources);
+               this.recordMultiSourceFrameReader.MultiSourceFrameArrived += this.Reader_RecordMultiSourceFrameArrived;
+               //this.recordMultiSourceFrameReader.MultiSourceFrameArrived += this.Reader_DisplayMultiSourceFrameArrived;
+
+
+               dispatcherTimerForCamera.Tick += new EventHandler(dispatcherTimer_forCamera_Tick);
+               dispatcherTimerForCamera.Interval = new TimeSpan(0, 0, 5);
+               dispatcherTimerForCamera.Start();
+
+           }
+           else {
+               System.Console.WriteLine("UPS!!!");
+           }
+
+        }
+
+        /// INotifyPropertyChangedPropertyChanged event to allow window controls to bind to changeable data
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        /// Gets or sets the current status text to display
+        public string StatusText
+        {
+            get
+            {
+                return this.statusText;
+            }
+
+            set
+            {
+                if (this.statusText != value)
+                {
+                    this.statusText = value;
+
+                    // notify any bound elements that the text has changed
+                    if (this.PropertyChanged != null)
+                    {
+                        this.PropertyChanged(this, new PropertyChangedEventArgs("StatusText"));
+                    }
+                }
+            }
         }
         public void playAllChildren(StackPanel stackPanel)
         {
@@ -612,9 +730,23 @@ namespace InterfaceForHI
         }
 
         private void dispatcherTimer_forCamera_Tick(object sender, EventArgs e) {
+            dispatcherTimerForCamera.Stop();
+
             //StopRecording
             //Restart the question video for now.
             //Later we will process what we've recorded.
+            recording = false;
+
+            // Dispose the Recording MultiSourceFrameReader.
+            if (recordMultiSourceFrameReader != null)
+            {
+                this.recordMultiSourceFrameReader.Dispose();
+                this.recordMultiSourceFrameReader = null;
+            }
+
+
+            File.WriteAllText(folderPath + "body.csv", myCSVwriter.ToString());
+            myCSVwriter.Clear();
 
             mainWindow.meMainVideo.Visibility = System.Windows.Visibility.Visible;
             mainWindow.imgDisplayImage.Visibility = System.Windows.Visibility.Hidden;
@@ -622,8 +754,6 @@ namespace InterfaceForHI
             mainWindow.MiddleLineBorder.Background = (System.Windows.Media.Brush)mainWindow.Resources["OrangeBrush"];
             mainWindow.MiddleLineBorder_.Background = (System.Windows.Media.Brush)mainWindow.Resources["OrangeBrush_"];
             restartVideo();
-            dispatcherTimerForCamera.Stop();
-
 
         }
         private void videoTrick(StackPanel stackPanel, int videoOff, Boolean isIncrement)
@@ -1123,6 +1253,31 @@ namespace InterfaceForHI
                 lvMenu.Visibility = System.Windows.Visibility.Visible;
             }
         }
+
+
+
+        /// Execute shutdown tasks
+        private void mainWindow_Closing(object sender, CancelEventArgs e)
+        {
+            if (this.displayMultiSourceFrameReader != null)
+            {
+                this.displayMultiSourceFrameReader.Dispose();
+                this.displayMultiSourceFrameReader = null;
+            }
+
+            if (this.recordMultiSourceFrameReader != null)
+            {
+                this.recordMultiSourceFrameReader.Dispose();
+                this.recordMultiSourceFrameReader = null;
+            }
+
+            if (this.kinectSensor != null)
+            {
+                this.kinectSensor.Close();
+                this.kinectSensor = null;
+            }
+        }
+
     }
 
     public class Person
