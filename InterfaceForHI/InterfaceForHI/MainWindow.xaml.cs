@@ -781,6 +781,7 @@
             // Fastest Lossless Compresion
             //startInfo.Arguments = "/C ffmpeg -i color.avi -c:v libx264 -preset ultrafast -qp 0 color.mkv & ffmpeg -i depth.avi -c:v libx264 -preset ultrafast -qp 0 depth.mkv & del color.avi & del depth.avi";
 
+            //startInfo.Arguments = "/C ffmpeg -i color.avi -c:v libx264 -preset ultrafast -qp 0 color.mkv";
             startInfo.Arguments = "/C ffmpeg -i color.avi -c:v libx264 -preset ultrafast -qp 0 color.mkv";
 
             process.StartInfo = startInfo;
